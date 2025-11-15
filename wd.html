@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce Portal (Single Page Format - 52 Products)</title>
+
+    <style>
+        /* --- Global Styles & Animated Background --- */
+        :root {
+            --primary-color: #007bff;
+            --danger-color: #dc3545;
+            --success-color: #28a745;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            line-height: 1.6;
+            color: #333;
+            
+            /* Animated Gradient Background */
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2, #fbc2eb, #a6c1ee);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            min-height: 100vh;
+        }
+
+        /* Keyframes for the animation */
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        /* This class is for content boxes on simple pages */
+        .page-content {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: 30px;
+            margin-bottom: 50px;
+        }
+
+        .page-content:first-of-type {
+            margin-top: 50px; /* Space below the navbar */
+        }
+        
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 40px 0;
+        }
+
+        /* --- Buttons --- */
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s ease;
+            background-color: #e0e0e0;
+        }
+        .btn:hover { background-color: #ccc; }
+        .btn.btn-primary { background-color: var(--primary-color); color: white; }
+        .btn.btn-primary:hover { background-color: #0056b3; }
+        .btn.submit-btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1rem;
+            background-color: var(--success-color);
+            color: white;
+        }
+        .btn.submit-btn:hover { background-color: #218838; }
+
+        /* --- 1. Navigation Bar (Fixed for smooth jumping) --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            padding: 10px 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 500;
+        }
+        .nav-logo a { font-size: 1.8rem; font-weight: bold; color: #333; text-decoration: none; }
+        .nav-menu, .nav-user-actions {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+        }
+        .nav-item { margin-left: 20px; }
+        .nav-link { text-decoration: none; color: #555; font-weight: 500; }
+        .nav-link:hover { color: var(--primary-color); }
+
+        /* --- 2. Product Grid --- */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .product-image-placeholder {
+            width: 100%;
+            height: 180px;
+            background-color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 0.8rem;
+        }
+        .product-card h3 { margin: 10px 0 5px 0; font-size: 1.1rem;}
+        .price { font-size: 1.2rem; font-weight: bold; color: #333; }
+
+        /* --- 3. Registration Form --- */
+        .form-container {
+            max-width: 500px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-group .error-message {
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            display: none;
+            margin-top: 5px;
+        }
+        .form-group.error input { border-color: var(--danger-color); }
+        .form-group.error .error-message { display: block; }
+
+        /* --- 4. Product Modal --- */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-backdrop.active { display: flex; opacity: 1; }
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: translateY(-50px);
+            transition: transform 0.3s ease;
+        }
+        .modal-backdrop.active .modal-content { transform: translateY(0); }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 2.5rem;
+            color: #aaa;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .modal-close:hover { color: #333; }
+        .modal-body { display: flex; gap: 30px; }
+        .modal-image-placeholder {
+            width: 300px;
+            height: 300px;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+            border-radius: 5px;
+            flex-shrink: 0;
+        }
+        .modal-details { flex-grow: 1; }
+        .modal-details h2 { margin-top: 0; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav class="navbar">
+            <div class="nav-logo"><a href="#home">MyStore</a></div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="#home" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="#products" class="nav-link">Products</a></li>
+                <li class="nav-item"><a href="#about" class="nav-link">About Us</a></li>
+                <li class="nav-item"><a href="#contact" class="nav-link">Contact Us</a></li>
+            </ul>
+            <div class="nav-user-actions">
+                <a href="#register" class="nav-link">Register</a>
+                <a href="#" class="nav-link">Login</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        
+        <section id="home" class="page-content">
+            <h1>Welcome to MyStore!</h1>
+            <p>Your one-stop shop for everything you need. Scroll down or use the menu to explore.</p>
+            <a href="#products" class="btn btn-primary">Shop Now</a>
+        </section>
+
+        <hr>
+        
+        <section id="products">
+            <h2 class="page-content" style="background: none; box-shadow: none;">Our 52+ Electronic Products</h2>
+            <div class="product-grid">
+                
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Pro Wireless Headphones]</div>
+                    <h3>Pro Wireless Headphones</h3>
+                    <p class="price">$349.00</p>
+                    <button class="btn quick-view-btn" data-id="1">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Ultra HD Smart TV 55in]</div>
+                    <h3>Ultra HD Smart TV (55in)</h3>
+                    <p class="price">$799.99</p>
+                    <button class="btn quick-view-btn" data-id="2">Quick View</button>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Gaming Laptop RTX 4070]</div>
+                    <h3>Gaming Laptop (RTX 4070)</h3>
+                    <p class="price">$1,899.50</p>
+                    <button class="btn quick-view-btn" data-id="3">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Portable Bluetooth Speaker]</div>
+                    <h3>Portable Bluetooth Speaker</h3>
+                    <p class="price">$89.99</p>
+                    <button class="btn quick-view-btn" data-id="4">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Smart Refrigerator Touch Screen]</div>
+                    <h3>Smart Refrigerator (Touch Screen)</h3>
+                    <p class="price">$2,999.00</p>
+                    <button class="btn quick-view-btn" data-id="5">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: E-Reader Paperwhite]</div>
+                    <h3>E-Reader (Paperwhite)</h3>
+                    <p class="price">$139.99</p>
+                    <button class="btn quick-view-btn" data-id="6">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Desktop Monitor Curved 34in]</div>
+                    <h3>Desktop Monitor (Curved 34in)</h3>
+                    <p class="price">$599.00</p>
+                    <button class="btn quick-view-btn" data-id="7">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Noise-Cancelling Earbuds]</div>
+                    <h3>Noise-Cancelling Earbuds</h3>
+                    <p class="price">$199.00</p>
+                    <button class="btn quick-view-btn" data-id="8">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Security Camera System 4-pack]</div>
+                    <h3>Security Camera System (4-pack)</h3>
+                    <p class="price">$299.50</p>
+                    <button class="btn quick-view-btn" data-id="9">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Wireless Keyboard and Mouse Set]</div>
+                    <h3>Wireless Keyboard and Mouse Set</h3>
+                    <p class="price">$65.00</p>
+                    <button class="btn quick-view-btn" data-id="10">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: VR Headset Next Gen]</div>
+                    <h3>VR Headset (Next Gen)</h3>
+                    <p class="price">$499.00</p>
+                    <button class="btn quick-view-btn" data-id="11">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Drone 4K Camera]</div>
+                    <h3>Drone (4K Camera)</h3>
+                    <p class="price">$850.00</p>
+                    <button class="btn quick-view-btn" data-id="12">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Mesh Wi-Fi Router Tri-band]</div>
+                    <h3>Mesh Wi-Fi Router (Tri-band)</h3>
+                    <p class="price">$199.99</p>
+                    <button class="btn quick-view-btn" data-id="13">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Digital Drawing Tablet]</div>
+                    <h3>Digital Drawing Tablet</h3>
+                    <p class="price">$119.00</p>
+                    <button class="btn quick-view-btn" data-id="14">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Smart Doorbell Camera]</div>
+                    <h3>Smart Doorbell Camera</h3>
+                    <p class="price">$150.00</p>
+                    <button class="btn quick-view-btn" data-id="15">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Power Bank 20000mAh]</div>
+                    <h3>Power Bank (20,000mAh)</h3>
+                    <p class="price">$45.00</p>
+                    <button class="btn quick-view-btn" data-id="16">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: LED Desk Lamp Dimmable]</div>
+                    <h3>LED Desk Lamp (Dimmable)</h3>
+                    <p class="price">$35.00</p>
+                    <button class="btn quick-view-btn" data-id="17">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Home Theatre Soundbar]</div>
+                    <h3>Home Theatre Soundbar</h3>
+                    <p class="price">$299.00</p>
+                    <button class="btn quick-view-btn" data-id="18">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Portable Projector]</div>
+                    <h3>Portable Projector</h3>
+                    <p class="price">$399.00</p>
+                    <button class="btn quick-view-btn" data-id="19">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Robotic Vacuum Cleaner]</div>
+                    <h3>Robotic Vacuum Cleaner</h3>
+                    <p class="price">$350.00</p>
+                    <button class="btn quick-view-btn" data-id="20">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Smart Plug 4-pack]</div>
+                    <h3>Smart Plug (4-pack)</h3>
+                    <p class="price">$29.99</p>
+                    <button class="btn quick-view-btn" data-id="21">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Electric Toothbrush Sonic]</div>
+                    <h3>Electric Toothbrush (Sonic)</h3>
+                    <p class="price">$75.00</p>
+                    <button class="btn quick-view-btn" data-id="22">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Digital Voice Recorder]</div>
+                    <h3>Digital Voice Recorder</h3>
+                    <p class="price">$55.00</p>
+                    <button class="btn quick-view-btn" data-id="23">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Instant Camera Mini]</div>
+                    <h3>Instant Camera (Mini)</h3>
+                    <p class="price">$99.00</p>
+                    <button class="btn quick-view-btn" data-id="24">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: External Hard Drive 4TB]</div>
+                    <h3>External Hard Drive (4TB)</h3>
+                    <p class="price">$120.00</p>
+                    <button class="btn quick-view-btn" data-id="25">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Smart Fitness Scale]</div>
+                    <h3>Smart Fitness Scale</h3>
+                    <p class="price">$69.99</p>
+                    <button class="btn quick-view-btn" data-id="26">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Coffee Machine Espresso]</div>
+                    <h3>Coffee Machine (Espresso)</h3>
+                    <p class="price">$450.00</p>
+                    <button class="btn quick-view-btn" data-id="27">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Car Dash Cam Dual Lens]</div>
+                    <h3>Car Dash Cam (Dual Lens)</h3>
+                    <p class="price">$110.00</p>
+                    <button class="btn quick-view-btn" data-id="28">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Smart Thermostat]</div>
+                    <h3>Smart Thermostat</h3>
+                    <p class="price">$179.00</p>
+                    <button class="btn quick-view-btn" data-id="29">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Portable Gaming Console]</div>
+                    <h3>Portable Gaming Console</h3>
+                    <p class="price">$399.00</p>
+                    <button class="btn quick-view-btn" data-id="30">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: 3D Printer Entry Level]</div>
+                    <h3>3D Printer (Entry Level)</h3>
+                    <p class="price">$250.00</p>
+                    <button class="btn quick-view-btn" data-id="31">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: USB-C Hub 7-in-1]</div>
+                    <h3>USB-C Hub (7-in-1)</h3>
+                    <p class="price">$59.00</p>
+                    <button class="btn quick-view-btn" data-id="32">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Air Fryer Digital]</div>
+                    <h3>Air Fryer (Digital)</h3>
+                    <p class="price">$120.00</p>
+                    <button class="btn quick-view-btn" data-id="33">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: GPS Watch Trail Runner]</div>
+                    <h3>GPS Watch (Trail Runner)</h3>
+                    <p class="price">$299.00</p>
+                    <button class="btn quick-view-btn" data-id="34">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Wireless Charging Pad]</div>
+                    <h3>Wireless Charging Pad</h3>
+                    <p class="price">$25.00</p>
+                    <button class="btn quick-view-btn" data-id="35">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Home Security Drone]</div>
+                    <h3>Home Security Drone</h3>
+                    <p class="price">$999.00</p>
+                    <button class="btn quick-view-btn" data-id="36">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Digital Photo Frame 10in]</div>
+                    <h3>Digital Photo Frame (10in)</h3>
+                    <p class="price">$89.00</p>
+                    <button class="btn quick-view-btn" data-id="37">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Laser Projector Short Throw]</div>
+                    <h3>Laser Projector (Short Throw)</h3>
+                    <p class="price">$1,500.00</p>
+                    <button class="btn quick-view-btn" data-id="38">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Smart Water Bottle]</div>
+                    <h3>Smart Water Bottle</h3>
+                    <p class="price">$49.99</p>
+                    <button class="btn quick-view-btn" data-id="39">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Portable AC Unit]</div>
+                    <h3>Portable AC Unit</h3>
+                    <p class="price">$320.00</p>
+                    <button class="btn quick-view-btn" data-id="40">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Electric Kettle Temperature Control]</div>
+                    <h3>Electric Kettle (Temperature Control)</h3>
+                    <p class="price">$55.00</p>
+                    <button class="btn quick-view-btn" data-id="41">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Gaming Mouse RGB]</div>
+                    <h3>Gaming Mouse (RGB)</h3>
+                    <p class="price">$49.00</p>
+                    <button class="btn quick-view-btn" data-id="42">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Smart Scale Kitchen]</div>
+                    <h3>Smart Scale (Kitchen)</h3>
+                    <p class="price">$39.99</p>
+                    <button class="btn quick-view-btn" data-id="43">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: HD Webcam 1080p]</div>
+                    <h3>HD Webcam (1080p)</h3>
+                    <p class="price">$79.00</p>
+                    <button class="btn quick-view-btn" data-id="44">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Mechanical Keyboard TKL]</div>
+                    <h3>Mechanical Keyboard (TKL)</h3>
+                    <p class="price">$99.00</p>
+                    <button class="btn quick-view-btn" data-id="45">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: External SSD 1TB]</div>
+                    <h3>External SSD (1TB)</h3>
+                    <p class="price">$150.00</p>
+                    <button class="btn quick-view-btn" data-id="46">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Smart Air Purifier]</div>
+                    <h3>Smart Air Purifier</h3>
+                    <p class="price">$220.00</p>
+                    <button class="btn quick-view-btn" data-id="47">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Portable CD Player Bluetooth]</div>
+                    <h3>Portable CD Player (Bluetooth)</h3>
+                    <p class="price">$69.00</p>
+                    <button class="btn quick-view-btn" data-id="48">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Smart Garden Herb Kit]</div>
+                    <h3>Smart Garden (Herb Kit)</h3>
+                    <p class="price">$99.00</p>
+                    <button class="btn quick-view-btn" data-id="49">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Digital Multimeter]</div>
+                    <h3>Digital Multimeter</h3>
+                    <p class="price">$35.00</p>
+                    <button class="btn quick-view-btn" data-id="50">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Electric Screwdriver Set]</div>
+                    <h3>Electric Screwdriver Set</h3>
+                    <p class="price">$45.00</p>
+                    <button class="btn quick-view-btn" data-id="51">Quick View</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-placeholder">[Image: Digital Caliper]</div>
+                    <h3>Digital Caliper</h3>
+                    <p class="price">$20.00</p>
+                    <button class="btn quick-view-btn" data-id="52">Quick View</button>
+                </div>
+
+            </div>
+        </section>
+
+        <hr>
+
+        <section id="register">
+            <div class="form-container">
+                <h2>Create an Account</h2>
+                <form id="register-form" novalidate>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" required>
+                        <small class="error-message"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                        <small class="error-message"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password (min 8 chars)</label>
+                        <input type="password" id="password" required minlength="8">
+                        <small class="error-message"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="password-confirm">Confirm Password</label>
+                        <input type="password" id="password-confirm" required>
+                        <small class="error-message"></small>
+                    </div>
+                    <button type="submit" class="btn submit-btn">Register</button>
+                </form>
+            </div>
+        </section>
+
+        <hr>
+
+        <section id="about" class="page-content">
+            <h1>About Us</h1>
+            <p>We started MyStore with one goal: to provide the best products with the best service. Our team is passionate about quality and customer satisfaction.</p>
+        </section>
+
+        <hr>
+
+        <section id="contact" class="page-content">
+            <h1>Contact Us</h1>
+            <p>Have questions? We'd love to hear from you!</p>
+            <p>Email us at: <b>support@mystore.com</b></p>
+        </section>
+
+    </main>
+
+    <div id="product-modal" class="modal-backdrop">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div class="modal-body">
+                <div class="modal-image-placeholder">[Product Image Placeholder]</div>
+                <div class="modal-details">
+                    <h2 id="modal-title">Product Title</h2>
+                    <p class="price" id="modal-price">$0.00</p>
+                    <p id="modal-description">This is the detailed product description...</p>
+                    <button class="btn btn-primary">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            // --- DUMMY DATA FOR 52 ELECTRONIC PRODUCTS ---
+            const productData = {
+                "1": { name: "Pro Wireless Headphones", price: "$349.00", description: "Studio-quality audio with 30-hour battery life." },
+                "2": { name: "Ultra HD Smart TV (55in)", price: "$799.99", description: "Crystal clear 4K display with built-in streaming." },
+                "3": { name: "Gaming Laptop (RTX 4070)", price: "$1,899.50", description: "High-performance machine for competitive gaming." },
+                "4": { name: "Portable Bluetooth Speaker", price: "$89.99", description: "Waterproof speaker with deep bass and 12-hour playtime." },
+                "5": { name: "Smart Refrigerator (Touch Screen)", price: "$2,999.00", description: "Manage your groceries and calendar right from the door." },
+                "6": { name: "E-Reader (Paperwhite)", price: "$139.99", description: "Glare-free screen perfect for reading outdoors." },
+                "7": { name: "Desktop Monitor (Curved 34in)", price: "$599.00", description: "Immersive wide-screen experience for work and play." },
+                "8": { name: "Noise-Cancelling Earbuds", price: "$199.00", description: "Perfect sound isolation for travel or concentration." },
+                "9": { name: "Security Camera System (4-pack)", price: "$299.50", description: "HD surveillance with night vision and cloud storage." },
+                "10": { name: "Wireless Keyboard and Mouse Set", price: "$65.00", description: "Ergonomic design with silent keys." },
+                "11": { name: "VR Headset (Next Gen)", price: "$499.00", description: "Full sensory virtual reality immersion." },
+                "12": { name: "Drone (4K Camera)", price: "$850.00", description: "Professional aerial photography and video." },
+                "13": { name: "Mesh Wi-Fi Router (Tri-band)", price: "$199.99", description: "Eliminate dead spots and boost speeds." },
+                "14": { name: "Digital Drawing Tablet", price: "$119.00", description: "Pressure-sensitive surface for digital artists." },
+                "15": { name: "Smart Doorbell Camera", price: "$150.00", description: "See, hear, and speak to visitors from anywhere." },
+                "16": { name: "Power Bank (20,000mAh)", price: "$45.00", description: "Fast charge your devices multiple times." },
+                "17": { name: "LED Desk Lamp (Dimmable)", price: "$35.00", description: "Adjustable color temperature and brightness." },
+                "18": { name: "Home Theatre Soundbar", price: "$299.00", description: "Cinematic audio experience for your living room." },
+                "19": { name: "Portable Projector", price: "$399.00", description: "Enjoy movies anywhere with a bright, clear image." },
+                "20": { name: "Robotic Vacuum Cleaner", price: "$350.00", description: "Scheduled cleaning with smart mapping." },
+                "21": { name: "Smart Plug (4-pack)", price: "$29.99", description: "Control any appliance with your voice." },
+                "22": { name: "Electric Toothbrush (Sonic)", price: "$75.00", description: "Superior cleaning with pressure sensors." },
+                "23": { name: "Digital Voice Recorder", price: "$55.00", description: "High-quality audio recording for lectures and meetings." },
+                "24": { name: "Instant Camera (Mini)", price: "$99.00", description: "Print photos instantly with a vintage look." },
+                "25": { name: "External Hard Drive (4TB)", price: "$120.00", description: "Massive storage for backups and media." },
+                "26": { name: "Smart Fitness Scale", price: "$69.99", description: "Tracks weight, BMI, and body composition." },
+                "27": { name: "Coffee Machine (Espresso)", price: "$450.00", description: "Brew cafe-quality espresso at home." },
+                "28": { name: "Car Dash Cam (Dual Lens)", price: "$110.00", description: "Records front and rear views in Full HD." },
+                "29": { name: "Smart Thermostat", price: "$179.00", description: "Learns your habits to save energy." },
+                "30": { name: "Portable Gaming Console", price: "$399.00", description: "Play your favorite titles on the go." },
+                "31": { name: "3D Printer (Entry Level)", price: "$250.00", description: "Perfect for beginners to start prototyping." },
+                "32": { name: "USB-C Hub (7-in-1)", price: "$59.00", description: "Expands connectivity with HDMI, USB, and SD slots." },
+                "33": { name: "Air Fryer (Digital)", price: "$120.00", description: "Healthy frying with preset cooking modes." },
+                "34": { name: "GPS Watch (Trail Runner)", price: "$299.00", description: "Long battery life with detailed outdoor maps." },
+                "35": { name: "Wireless Charging Pad", price: "$25.00", description: "Quickly charge your phone without cables." },
+                "36": { name: "Home Security Drone", price: "$999.00", description: "Autonomous indoor surveillance drone." },
+                "37": { name: "Digital Photo Frame (10in)", price: "$89.00", description: "Share and display photos instantly." },
+                "38": { name: "Laser Projector (Short Throw)", price: "$1,500.00", description: "Giant screen from a short distance." },
+                "39": { name: "Smart Water Bottle", price: "$49.99", description: "Tracks hydration and glows to remind you to drink." },
+                "40": { name: "Portable AC Unit", price: "$320.00", description: "Keep cool in small rooms or apartments." },
+                "41": { name: "Electric Kettle (Temperature Control)", price: "$55.00", description: "Boil water to the exact degree for tea and coffee." },
+                "42": { name: "Gaming Mouse (RGB)", price: "$49.00", description: "High precision sensor with customizable lighting." },
+                "43": { name: "Smart Scale (Kitchen)", price: "$39.99", description: "Measures ingredients and nutritional facts." },
+                "44": { name: "HD Webcam (1080p)", price: "$79.00", description: "Perfect video quality for streaming and meetings." },
+                "45": { name: "Mechanical Keyboard (TKL)", price: "$99.00", description: "Tactile keys for fast, satisfying typing." },
+                "46": { name: "External SSD (1TB)", price: "$150.00", description: "Blazing fast transfer speeds for large files." },
+                "47": { name: "Smart Air Purifier", price: "$220.00", description: "Removes allergens and pollutants from the air." },
+                "48": { name: "Portable CD Player (Bluetooth)", price: "$69.00", description: "Modern take on a classic device." },
+                "49": { name: "Smart Garden (Herb Kit)", price: "$99.00", description: "Grow fresh herbs indoors effortlessly." },
+                "50": { name: "Digital Multimeter", price: "$35.00", description: "Essential tool for electronic DIY projects." },
+                "51": { name: "Electric Screwdriver Set", price: "$45.00", description: "Rechargeable, perfect for small electronics repair." },
+                "52": { name: "Digital Caliper", price: "$20.00", description: "Precise measurements for engineering and design." }
+            };
+
+            // --- PRODUCT MODAL LOGIC (The Quick View Feature) ---
+            const modal = document.getElementById("product-modal");
+            if (modal) {
+                const closeModalBtn = modal.querySelector(".modal-close");
+                const quickViewBtns = document.querySelectorAll(".quick-view-btn");
+                const modalTitle = document.getElementById("modal-title");
+                const modalPrice = document.getElementById("modal-price");
+                const modalDescription = document.getElementById("modal-description");
+
+                function openModal(productId) {
+                    const product = productData[productId];
+                    if (product) {
+                        modalTitle.textContent = product.name;
+                        modalPrice.textContent = product.price;
+                        modalDescription.textContent = product.description;
+                    }
+                    modal.classList.add("active");
+                }
+
+                function closeModal() {
+                    modal.classList.remove("active");
+                }
+
+                quickViewBtns.forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const productId = btn.dataset.id;
+                        openModal(productId);
+                    });
+                });
+
+                closeModalBtn.addEventListener("click", closeModal);
+                modal.addEventListener("click", (event) => {
+                    if (event.target === modal) closeModal();
+                });
+            }
+
+
+            // --- FORM VALIDATION LOGIC ---
+            const registerForm = document.getElementById("register-form");
+
+            if (registerForm) {
+                const username = document.getElementById("username");
+                const email = document.getElementById("email");
+                const password = document.getElementById("password");
+                const passwordConfirm = document.getElementById("password-confirm");
+
+                registerForm.addEventListener("submit", function (event) {
+                    event.preventDefault(); 
+                    if (!checkUsername() || !checkEmail() || !checkPassword() || !checkPasswordConfirm()) {
+                        alert("Please correct the errors in the form.");
+                    } else {
+                        alert("Registration successful! (Form data ready to be sent to a server)");
+                        // Data submission logic goes here
+                    }
+                });
+
+                // Helper functions for validation feedback
+                function checkUsername() {
+                    if (username.value.trim() === "") { setError(username, "Username is required"); return false; } else { setSuccess(username); return true; }
+                }
+                function checkEmail() {
+                    if (!isValidEmail(email.value.trim())) { setError(email, "Please enter a valid email"); return false; } else { setSuccess(email); return true; }
+                }
+                function checkPassword() {
+                    if (password.value.length < 8) { setError(password, "Password must be at least 8 characters"); return false; } else { setSuccess(password); return true; }
+                }
+                function checkPasswordConfirm() {
+                    if (passwordConfirm.value !== password.value) { setError(passwordConfirm, "Passwords do not match"); return false; } else { setSuccess(passwordConfirm); return true; }
+                }
+
+                // UI feedback functions
+                function setError(input, message) {
+                    const fg = input.parentElement;
+                    fg.classList.remove("success"); fg.classList.add("error");
+                    fg.querySelector(".error-message").innerText = message;
+                }
+                function setSuccess(input) {
+                    const fg = input.parentElement;
+                    fg.classList.remove("error"); fg.classList.add("success");
+                    fg.querySelector(".error-message").innerText = "";
+                }
+                function isValidEmail(email) {
+                    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                    return re.test(String(email).toLowerCase());
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
